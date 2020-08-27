@@ -274,4 +274,40 @@ extension DateExtension on TimeOfDay {
     final minute = this.minute.toString().padLeft(2, "0",);
     return "$hour:$minute";
   }
+
+  TimeOfDay add({int hour = 0, int minute = 0,}) {
+    if (hour == null && minute == null) { return this; }
+    if (hour < 0 || minute < 0) { return this; }
+    final currentHour = this.hour;
+    final currentMinute = this.minute;
+    int newHour = currentHour + hour;
+    int newMinute = currentMinute + minute;
+    if (newMinute >= 60) {
+      newHour += (newMinute ~/ 60);
+      newMinute = newMinute % 60;
+    }
+    if (newHour >= 24) {
+      newHour = newHour % 24;
+    }
+    return this.replacing(hour: newHour, minute: newMinute,);
+  }
+
+  TimeOfDay subtract({int hour = 0, int minute = 0,}) {
+    if (hour == null && minute == null) { return this; }
+    if (hour < 0 || minute < 0) { return this; }
+    final currentHour = this.hour;
+    final currentMinute = this.minute;
+    int newHour = currentHour - (hour % 24);
+    int newMinute = currentMinute - (minute % 60);
+    if (minute >= 60) {
+      newHour -= (minute ~/ 60);
+    }
+    if (newMinute < 0) {
+      newMinute += 60;
+    }
+    if (newHour < 0) {
+      newHour += 24;
+    }
+    return this.replacing(hour: newHour, minute: newMinute,);
+  }
 }
