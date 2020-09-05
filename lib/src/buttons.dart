@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class SFBackButton extends StatelessWidget {
+class CustomBackButton extends StatelessWidget {
 
   final Icon icon;
   final Color color;
   final VoidCallback onPressed;
 
-  SFBackButton({
+  CustomBackButton({
     Key key,
     this.icon,
     this.color,
