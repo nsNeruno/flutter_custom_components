@@ -36,8 +36,11 @@ flutter:
     # then add platforms following the instruction here:
     # https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
     # -------------------
-      some_platform:
-        pluginClass: somePluginClass
+      android:
+        package: lab.neruno.flutter_custom_components
+        pluginClass: FlutterCustomComponentsPlugin
+      ios:
+        pluginClass: SwiftFlutterCustomComponentsPlugin
     # -------------------
 
   # To add assets to your plugin package, add an assets section, like this:
