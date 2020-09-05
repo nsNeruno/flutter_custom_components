@@ -21,7 +21,7 @@ class HttpModule {
 
   String _createJsonBody(Map<String, dynamic> body,) => body != null ? jsonEncode(body,) : null;
 
-  Future<SFHttpResponse> call(RequestOptions options, {
+  Future<HttpResponse> call(RequestOptions options, {
     Map<int, ResponseStatusCodeCallback> responseStatusCodeHandler,
   }) async {
     assert(options?.method != null,);
@@ -67,13 +67,13 @@ class HttpModule {
         break;
     }
     try {
-      return SFHttpResponse(
+      return HttpResponse(
         response: await response.timeout(options.timeout,),
       );
     } on IOException catch (_) {
-      return SFHttpResponse.networkError();
+      return HttpResponse.networkError();
     } on TimeoutException catch (_) {
-      return SFHttpResponse.timedOut();
+      return HttpResponse.timedOut();
     }
   }
 }
@@ -175,22 +175,22 @@ class RequestOptions {
   }
 }
 
-class SFHttpResponse {
+class HttpResponse {
 
   static const TIMED_OUT = "TIMED_OUT";
   static const IO_EXCEPTION = "IO_EXCEPTION";
 
-  SFHttpResponse({
+  HttpResponse({
     this.response,
     this.errorMessage,
   });
 
-  factory SFHttpResponse.timedOut() {
-    return SFHttpResponse(errorMessage: TIMED_OUT,);
+  factory HttpResponse.timedOut() {
+    return HttpResponse(errorMessage: TIMED_OUT,);
   }
 
-  factory SFHttpResponse.networkError() {
-    return SFHttpResponse(errorMessage: IO_EXCEPTION,);
+  factory HttpResponse.networkError() {
+    return HttpResponse(errorMessage: IO_EXCEPTION,);
   }
 
   int get statusCode => response?.statusCode;
