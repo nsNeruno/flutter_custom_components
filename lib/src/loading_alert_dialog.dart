@@ -27,7 +27,7 @@ abstract class LoadingAlertDialog {
 
     final WidgetBuilder builderWrapper = (context) {
       computation.then((value) {
-        Navigator.of(context, rootNavigator: Platform.isIOS,).pop();
+        Navigator.of(context,).pop();
         if (Platform.isIOS) {
           Future.delayed( Duration(milliseconds: 50,), () {
             completer.complete(value,);
@@ -36,7 +36,7 @@ abstract class LoadingAlertDialog {
           completer.complete(value,);
         }
       },).catchError((e,) {
-        Navigator.of(context, rootNavigator: Platform.isIOS,).pop();
+        Navigator.of(context,).pop();
         if (Platform.isIOS) {
           Future.delayed( Duration(milliseconds: 50,), () {
             completer.completeError(e,);
@@ -54,7 +54,11 @@ abstract class LoadingAlertDialog {
     if (Platform.isIOS) {
       showCupertinoDialog(
         context: context,
-        builder: builderWrapper,
+        builder: (context) {
+          return Builder(
+            builder: builderWrapper,
+          );
+        },
       );
     } else if (Platform.isAndroid) {
       showDialog(
