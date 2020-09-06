@@ -28,10 +28,22 @@ abstract class LoadingAlertDialog {
     final WidgetBuilder builderWrapper = (context) {
       computation.then((value) {
         Navigator.of(context,).pop();
-        completer.complete(value,);
+        if (Platform.isIOS) {
+          Future.delayed( Duration(milliseconds: 50,), () {
+            completer.complete(value,);
+          },);
+        } else {
+          completer.complete(value,);
+        }
       },).catchError((e,) {
         Navigator.of(context,).pop();
-        completer.completeError(e,);
+        if (Platform.isIOS) {
+          Future.delayed( Duration(milliseconds: 50,), () {
+            completer.completeError(e,);
+          },);
+        } else {
+          completer.completeError(e,);
+        }
       },);
       return WillPopScope(
         onWillPop: () async => false,
