@@ -27,7 +27,7 @@ abstract class LoadingAlertDialog {
 
     final WidgetBuilder builderWrapper = (context) {
       computation.then((value) {
-        Navigator.of(context,).pop();
+        Navigator.of(context, rootNavigator: Platform.isIOS,).pop();
         if (Platform.isIOS) {
           Future.delayed( Duration(milliseconds: 50,), () {
             completer.complete(value,);
@@ -36,7 +36,7 @@ abstract class LoadingAlertDialog {
           completer.complete(value,);
         }
       },).catchError((e,) {
-        Navigator.of(context,).pop();
+        Navigator.of(context, rootNavigator: Platform.isIOS,).pop();
         if (Platform.isIOS) {
           Future.delayed( Duration(milliseconds: 50,), () {
             completer.completeError(e,);
