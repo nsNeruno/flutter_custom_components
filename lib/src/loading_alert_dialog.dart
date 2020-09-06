@@ -27,7 +27,9 @@ abstract class LoadingAlertDialog {
 
     final WidgetBuilder builderWrapper = (context) {
       computation.then((value) {
-        Navigator.of(context,).pop();
+        if (Navigator.of(context,).canPop()) {
+          Navigator.of(context,).pop();
+        }
         if (Platform.isIOS) {
           Future.delayed( Duration(milliseconds: 50,), () {
             completer.complete(value,);
@@ -36,7 +38,9 @@ abstract class LoadingAlertDialog {
           completer.complete(value,);
         }
       },).catchError((e,) {
-        Navigator.of(context,).pop();
+        if (Navigator.of(context,).canPop()) {
+          Navigator.of(context,).pop();
+        }
         if (Platform.isIOS) {
           Future.delayed( Duration(milliseconds: 50,), () {
             completer.completeError(e,);
@@ -47,7 +51,9 @@ abstract class LoadingAlertDialog {
       },);
       return WillPopScope(
         onWillPop: () async => false,
-        child: _defaultWidgetBuilder?.call(context,) ?? builder?.call(context,) ?? Container(),
+        child: Builder(
+          builder: (context) => _defaultWidgetBuilder?.call(context,) ?? builder?.call(context,) ?? Container(),
+        ),
       );
     };
 
