@@ -11,7 +11,7 @@ class TestApp extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return MaterialApp(
-      title: "Soluix Flutter Components",
+      title: "Custom Flutter Components",
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -42,6 +42,10 @@ class _TestPageState extends State<TestPage> {
           RaisedButton(
             child: Text("Open PIN Page",),
             onPressed: _openPinPage,
+          ).maxWidth,
+          RaisedButton(
+            child: Text("Open Bottom Modal PIN Page",),
+            onPressed: _openBottomModalPinPage,
           ).maxWidth,
           RaisedButton(
             child: Text("Test Date Picker",),
@@ -92,6 +96,14 @@ class _TestPageState extends State<TestPage> {
           );
         },
       ),
+    );
+  }
+
+  void _openBottomModalPinPage() {
+    showPinEntryModalBottomSheet(
+      context: context,
+      appBar: AppBar(),
+      useDeviceKeyboard: true,
     );
   }
 

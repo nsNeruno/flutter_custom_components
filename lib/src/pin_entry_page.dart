@@ -350,3 +350,58 @@ class _InvisibleTextField extends StatelessWidget {
     );
   }
 }
+
+Future<T> showPinEntryModalBottomSheet<T>({
+  @required BuildContext context,
+  double heightFactor = 0.4,
+  String initialPinDigits,
+  Widget appBar,
+  Color backgroundColor,
+  EdgeInsetsGeometry contentPadding,
+  Widget top,
+  NumericKeyWidgetBuilder pinSlotBuilder,
+  double pinSlotPadding = 8.0,
+  WidgetBuilder emptyPinSlotBuilder,
+  Widget middle,
+  bool useDeviceKeyboard = false,
+  NumericKeyWidgetBuilder numericKeyBuilder,
+  WidgetBuilder deleteKeyBuilder,
+  Widget bottom,
+  OnPinChanged onPinChanged,
+  OnPinSubmitted onPinSubmitted,
+}) {
+  if (heightFactor == null || heightFactor < 0.0) {
+    heightFactor = 0.4;
+  }
+  if (heightFactor > 1.0) {
+    heightFactor = 1.0;
+  }
+  return showModalBottomSheet<T>(
+    context: context,
+    builder: (context) {
+      return Container(
+        constraints: BoxConstraints(
+          minWidth: double.infinity,
+          minHeight: MediaQuery.of(context,).size.height * heightFactor,
+        ),
+        child: PinEntryPage(
+          initialPinDigits: initialPinDigits,
+          appBar: appBar,
+          backgroundColor: backgroundColor,
+          contentPadding: contentPadding,
+          top: top,
+          pinSlotBuilder: pinSlotBuilder,
+          pinSlotPadding: pinSlotPadding,
+          emptyPinSlotBuilder: emptyPinSlotBuilder,
+          middle: middle,
+          useDeviceKeyboard: useDeviceKeyboard,
+          numericKeyBuilder: numericKeyBuilder,
+          deleteKeyBuilder: deleteKeyBuilder,
+          bottom: bottom,
+          onPinChanged: onPinChanged,
+          onPinSubmitted: onPinSubmitted,
+        ),
+      );
+    },
+  );
+}
