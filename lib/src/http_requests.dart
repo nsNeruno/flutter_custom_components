@@ -88,7 +88,7 @@ class RequestOptions {
     this.timeout = const Duration(seconds: 60,),
   }) {
     assert(timeout != null && timeout.inSeconds >= 1,);
-    _headers = (headers ?? {})..addAll(_baseHeaders ?? {},);
+    _headers = (headers ?? {})..addAll(baseHeaderBuilder?.call() ?? {},);
   }
 
   factory RequestOptions.get({
@@ -158,16 +158,7 @@ class RequestOptions {
   final Map<String, dynamic> body;
   final Duration timeout;
 
-  static Map<String, String> _baseHeaders = {};
-
-  static void setBaseHeaders(Map<String, String> newBaseHeaders,) {
-    assert(newBaseHeaders != null,);
-    _baseHeaders = newBaseHeaders;
-  }
-
-  static Map<String, String> copyBaseHeaders([Map<String, String> additionalHeaders]) {
-    return Map<String, String>.from(_baseHeaders,);
-  }
+  Map<String, String> Function() baseHeaderBuilder;
 
   @override
   String toString() {
