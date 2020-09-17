@@ -158,7 +158,7 @@ class RequestOptions {
   final Map<String, dynamic> body;
   final Duration timeout;
 
-  Map<String, String> Function() baseHeaderBuilder;
+  static Map<String, String> Function() baseHeaderBuilder;
 
   @override
   String toString() {
