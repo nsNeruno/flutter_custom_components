@@ -1,8 +1,7 @@
-import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 typedef NumericKeyWidgetBuilder = Widget Function(BuildContext context, int pinDigit,);
 typedef OnPinChanged = void Function(BuildContext context, String currentPin,);
@@ -58,19 +57,21 @@ class PinEntryPageState extends State<PinEntryPage> with WidgetsBindingObserver 
     if (widget.useDeviceKeyboard == true) {
       switch (state) {
         case AppLifecycleState.resumed:
-          _hiddenNode.requestFocus();
-          Future.delayed(Duration(milliseconds: 100,), () {
+          // _hiddenNode.requestFocus();
+          Timer timer;
+          timer = Timer( Duration(milliseconds: 100,), () {
             _forceOpenKeyboard();
+            timer.cancel();
           },);
           break;
         case AppLifecycleState.inactive:
-          _forceHideKeyboard();
+          // _forceHideKeyboard();
           break;
         case AppLifecycleState.paused:
-          _forceHideKeyboard();
+          // _forceHideKeyboard();
           break;
         case AppLifecycleState.detached:
-          _forceHideKeyboard();
+          // _forceHideKeyboard();
           break;
       }
     }
@@ -91,12 +92,15 @@ class PinEntryPageState extends State<PinEntryPage> with WidgetsBindingObserver 
       _hiddenController = TextEditingController();
       _hiddenNode = FocusNode();
 
-      _keyboardEventSubscriptionId = KeyboardVisibilityNotification().addNewListener(
-        onChange: _onKeyboardVisibilityChange,
-      );
-
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         _hiddenNode.requestFocus();
+        _hiddenNode.addListener(() {
+          if (mounted) {
+            if (!_hiddenNode.hasFocus) {
+              _hiddenNode.requestFocus();
+            }
+          }
+        },);
       },);
     }
   }
@@ -104,37 +108,31 @@ class PinEntryPageState extends State<PinEntryPage> with WidgetsBindingObserver 
   @override
   Widget build(BuildContext context) {
 
-    return WillPopScope(
-      onWillPop: () async {
-        _isPopped = true;
-        if (_keyboardEventSubscriptionId != null) {
-          isListeningToKeyboardEvents = false;
-        }
-        return true;
-      },
-      child: Stack(
-        children: <Widget>[
-          widget.useDeviceKeyboard == true ? _InvisibleTextField(
-            controller: _hiddenController,
-            focusNode: _hiddenNode,
-            onDigitAdded: (value) => _onPinKeyPressed(value?.toString(),),
-          ) : Container(),
-          Scaffold(
-            appBar: widget.appBar,
-            backgroundColor: widget.backgroundColor,
-            body: SafeArea(
-              child: Padding(
-                padding: widget.contentPadding ?? EdgeInsets.zero,
-                child: Column(
-                  children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          widget.top ?? Container(),
-                          ValueListenableBuilder(
-                            valueListenable: _pinDigits,
-                            builder: (_, value, __) => Row(
+    return Stack(
+      children: <Widget>[
+        widget.useDeviceKeyboard == true ? _InvisibleTextField(
+          controller: _hiddenController,
+          focusNode: _hiddenNode,
+          onDigitAdded: (value) => _onPinKeyPressed(value?.toString(),),
+        ) : Container(),
+        Scaffold(
+          appBar: widget.appBar,
+          backgroundColor: widget.backgroundColor,
+          body: SafeArea(
+            child: Padding(
+              padding: widget.contentPadding ?? EdgeInsets.zero,
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        widget.top ?? Container(),
+                        ValueListenableBuilder(
+                          valueListenable: _pinDigits,
+                          builder: (_, value, __) => GestureDetector(
+                            onTap: widget.useDeviceKeyboard == true ? _forceOpenKeyboard : null,
+                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: List.generate(
                                 6, (index) {
@@ -158,74 +156,67 @@ class PinEntryPageState extends State<PinEntryPage> with WidgetsBindingObserver 
                               ),
                             ),
                           ),
-                          widget.middle ?? Container(),
-                        ],
-                      ),
-                    ),
-                    widget.useDeviceKeyboard == true ? Container() : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ...List.generate(
-                          3, (rIndex) => Row(
-                            children: List.generate(
-                              3, (cIndex) {
-                                final digit = 3 * rIndex + cIndex + 1;
-                                return Expanded(
-                                  child: FlatButton(
-                                    shape: CircleBorder(),
-                                    child: widget.numericKeyBuilder?.call(context, digit,) ?? Text(digit.toString(),),
-                                    onPressed: () => _onPinKeyPressed(digit.toString(),),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
                         ),
-                        Row(
-                          children: <Widget>[
-                            Spacer(),
-                            Expanded(
-                              child: FlatButton(
-                                shape: CircleBorder(),
-                                child: widget.numericKeyBuilder?.call(context, 0,) ?? Text("0",),
-                                onPressed: () => _onPinKeyPressed("0",),
-                              ),
-                            ),
-                            Expanded(
-                              child: FlatButton(
-                                shape: CircleBorder(),
-                                child: widget.deleteKeyBuilder?.call(context,) ?? Icon(Icons.backspace,),
-                                onPressed: () => _onPinKeyPressed(null,),
-                              ),
-                            ),
-                          ],
-                        ),
+                        widget.middle ?? Container(),
                       ],
                     ),
-                    widget.bottom ?? Container(),
-                  ],
-                ),
+                  ),
+                  widget.useDeviceKeyboard == true ? Container() : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ...List.generate(
+                        3, (rIndex) => Row(
+                          children: List.generate(
+                            3, (cIndex) {
+                              final digit = 3 * rIndex + cIndex + 1;
+                              return Expanded(
+                                child: FlatButton(
+                                  shape: CircleBorder(),
+                                  child: widget.numericKeyBuilder?.call(context, digit,) ?? Text(digit.toString(),),
+                                  onPressed: () => _onPinKeyPressed(digit.toString(),),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: <Widget>[
+                          Spacer(),
+                          Expanded(
+                            child: FlatButton(
+                              shape: CircleBorder(),
+                              child: widget.numericKeyBuilder?.call(context, 0,) ?? Text("0",),
+                              onPressed: () => _onPinKeyPressed("0",),
+                            ),
+                          ),
+                          Expanded(
+                            child: FlatButton(
+                              shape: CircleBorder(),
+                              child: widget.deleteKeyBuilder?.call(context,) ?? Icon(Icons.backspace,),
+                              onPressed: () => _onPinKeyPressed(null,),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  widget.bottom ?? Container(),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   @override
   void dispose() {
-    _isPopped = true;
-    _forceHideKeyboard();
     _pinDigits.dispose();
 
     _hiddenController?.dispose();
     _hiddenNode?.dispose();
-
-    if (_keyboardEventSubscriptionId != null) {
-      KeyboardVisibilityNotification().removeListener(
-        _keyboardEventSubscriptionId,);
-    }
     super.dispose();
   }
 
@@ -233,28 +224,16 @@ class PinEntryPageState extends State<PinEntryPage> with WidgetsBindingObserver 
   TextEditingController _hiddenController;
   FocusNode _hiddenNode;
 
-  int _keyboardEventSubscriptionId;
-
   bool _isListeningToKeyboardEvents = true;
   bool get isListeningToKeyboardEvents => _isListeningToKeyboardEvents;
-  bool _isPopped = false;
 
   String get pinDigits => _pinDigits.value;
 
   void _forceOpenKeyboard() {
-    if (Platform.isIOS) {
+    if (mounted) {
       _hiddenNode.requestFocus();
-      return;
+      SystemChannels.textInput.invokeMethod("TextInput.show",);
     }
-    SystemChannels.textInput.invokeMethod("TextInput.show",);
-  }
-
-  void _forceHideKeyboard() {
-    if (Platform.isIOS) {
-      _hiddenNode.unfocus();
-      return;
-    }
-    SystemChannels.textInput.invokeMethod("TextInput.hide",);
   }
 
   void _onPinKeyPressed(String digit,) {
@@ -279,30 +258,6 @@ class PinEntryPageState extends State<PinEntryPage> with WidgetsBindingObserver 
 
   void _reset() {
     _pinDigits.value = "";
-  }
-
-  void _onKeyboardVisibilityChange(bool isVisible) {
-    if (!isVisible) {
-      if (!_isPopped) {
-        Future.delayed(Duration(milliseconds: 150,), () {
-          _forceOpenKeyboard();
-        },);
-      }
-    }
-  }
-
-  set isListeningToKeyboardEvents(bool value,) {
-    _isListeningToKeyboardEvents = value;
-    if (_isListeningToKeyboardEvents) {
-      _keyboardEventSubscriptionId = KeyboardVisibilityNotification().addNewListener(
-        onChange: _onKeyboardVisibilityChange,
-      );
-    } else {
-      if (_keyboardEventSubscriptionId != null) {
-        KeyboardVisibilityNotification().removeListener(
-          _keyboardEventSubscriptionId,);
-      }
-    }
   }
 
   void reset() => _reset();
