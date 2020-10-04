@@ -87,7 +87,9 @@ class _TestPageState extends State<TestPage> {
 //            );
 //          },);
           return PinEntryPage(
-            appBar: AppBar(),
+            appBar: AppBar(
+              title: Text("PIN Page",),
+            ),
             useDeviceKeyboard: true,
           );
         },
