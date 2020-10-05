@@ -94,13 +94,6 @@ class PinEntryPageState extends State<PinEntryPage> with WidgetsBindingObserver 
 
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         _hiddenNode.requestFocus();
-        _hiddenNode.addListener(() {
-          if (mounted) {
-            if (!_hiddenNode.hasFocus) {
-              _hiddenNode.requestFocus();
-            }
-          }
-        },);
       },);
     }
   }
@@ -223,9 +216,6 @@ class PinEntryPageState extends State<PinEntryPage> with WidgetsBindingObserver 
   final ValueNotifier<String> _pinDigits = ValueNotifier("",);
   TextEditingController _hiddenController;
   FocusNode _hiddenNode;
-
-  bool _isListeningToKeyboardEvents = true;
-  bool get isListeningToKeyboardEvents => _isListeningToKeyboardEvents;
 
   String get pinDigits => _pinDigits.value;
 
