@@ -106,7 +106,10 @@ class PinEntryPageState extends State<PinEntryPage> with WidgetsBindingObserver 
         widget.useDeviceKeyboard == true ? _InvisibleTextField(
           controller: _hiddenController,
           focusNode: _hiddenNode,
-          onDigitAdded: (value) => _onPinKeyPressed(value?.toString(),),
+          onPinChanged: (pin) {
+            _pinDigits.value = pin;
+            widget.onPinChanged?.call(context, _pinDigits.value,);
+          },
         ) : Container(),
         Scaffold(
           appBar: widget.appBar,
@@ -257,13 +260,13 @@ class _InvisibleTextField extends StatelessWidget {
 
   final TextEditingController controller;
   final FocusNode focusNode;
-  final ValueChanged<int> onDigitAdded;
+  final ValueChanged<String> onPinChanged;
 
   const _InvisibleTextField({
     Key key,
     this.controller,
     this.focusNode,
-    this.onDigitAdded,
+    this.onPinChanged,
   }) : super(key: key,);
 
   @override
@@ -276,19 +279,16 @@ class _InvisibleTextField extends StatelessWidget {
           autofocus: true,
           controller: controller,
           focusNode: focusNode,
+          decoration: InputDecoration(
+            counterText: "",
+          ),
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.done,
+          onChanged: onPinChanged,
           onSubmitted: (_) {},
           inputFormatters: [
-            TextInputFormatter.withFunction((oldValue, newValue) {
-              final incomingText = newValue.text.trim();
-              String digit;
-              if (incomingText.length >= 1) {
-                digit = incomingText[0];
-              }
-              onDigitAdded?.call(int.tryParse(digit ?? "",),);
-              return newValue.copyWith(text: " ", selection: TextSelection.collapsed(offset: 1,),);
-            },),
+            LengthLimitingTextInputFormatter(PIN_LENGTH,),
+            FilteringTextInputFormatter.digitsOnly,
           ],
         ),
       ),
