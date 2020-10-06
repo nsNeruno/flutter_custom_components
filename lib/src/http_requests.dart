@@ -35,7 +35,9 @@ class HttpModule {
         }
         if (options.headers != null) {
           options.headers.entries.forEach((element) {
-            request.headers[element.key] = element.value;
+            if (!request.headers.containsKey(element.key)) {
+              request.headers[element.key] = element.value;
+            }
           },);
         }
         final Future<StreamedResponse> streamedResponse = request.send();
